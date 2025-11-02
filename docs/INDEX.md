@@ -64,11 +64,14 @@ Quick navigation to all documentation.
 
 **Essential Reading:**
 - [`OUT_OF_BOX_GUIDE.md`](OUT_OF_BOX_GUIDE.md) - Zero-config setup guide
-- [`NETWORK_SHARING.md`](NETWORK_SHARING.md) - **NEW!** Share with team
+- [`INSTALL.md`](INSTALL.md) - Installation guide
+- [`NETWORK_SHARING.md`](NETWORK_SHARING.md) - Share with team (network/external)
 - [`WEB_INTERFACE_GUIDE.md`](WEB_INTERFACE_GUIDE.md) - Web UI complete guide
 - [`guides/QUICKSTART.md`](guides/QUICKSTART.md) - 5-minute walkthrough
-- [`guides/FILE_FORMATS.md`](guides/FILE_FORMATS.md) - Supported formats reference
-- [`guides/PRIVACY.md`](guides/PRIVACY.md) - Privacy & security guides
+- [`guides/DEPLOYMENT_GUIDE.md`](guides/DEPLOYMENT_GUIDE.md) - Cloud deployment options
+- [`guides/WEB_INTERFACE.md`](guides/WEB_INTERFACE.md) - Web UI quick reference
+- [`guides/FILE_FORMATS.md`](guides/FILE_FORMATS.md) - Supported formats
+- [`guides/PRIVACY.md`](guides/PRIVACY.md) - Privacy & security
 
 ### For Developers
 1. [PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md) - Technical details

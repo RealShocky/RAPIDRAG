@@ -39,7 +39,7 @@ python ingest_documents.py --samples
 python chatbot.py
 ```
 
-**See:** [`docs/OUT_OF_BOX_GUIDE.md`](docs/OUT_OF_BOX_GUIDE.md) for zero-config setup!
+**See:** [`docs/OUT_OF_BOX_GUIDE.md`](docs/OUT_OF_BOX_GUIDE.md) for zero-config guide!
 
 ---
 
