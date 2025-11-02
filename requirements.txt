@@ -15,12 +15,18 @@ ollama-haystack>=1.0.0  # For Ollama local models (included)
 # Data handling
 datasets>=2.6.1
 
-# Document processing - multiple formats
-pypdf>=3.0.0  # PDF support
-python-docx>=1.0.0  # DOCX support
-markdown>=3.4.0  # Enhanced markdown
+# Document processing - Document processors
+pypdf>=3.17.0  # PDF support
+python-docx>=1.1.0  # Word support
+markdown>=3.5.0  # Enhanced markdown
 beautifulsoup4>=4.12.0  # HTML support
 lxml>=4.9.0  # XML/HTML parsing
+openpyxl>=3.1.0  # Excel support (.xlsx)
+xlrd>=2.0.1  # Excel support (.xls)
+python-pptx>=0.6.21  # PowerPoint support
+striprtf>=0.0.26  # RTF support
+ebooklib>=0.18  # EPUB support
+pandas>=2.0.0  # CSV and data files
 
 # CLI and utilities
 python-dotenv>=1.0.0

@@ -110,14 +110,16 @@ documents/
 
 ### Supported Formats
 
-| Format | Extension | Support |
-|--------|-----------|---------|
-| Plain Text | `.txt` | ✅ Full |
-| Markdown | `.md` | ✅ Full |
-| PDF | `.pdf` | ✅ Full |
-| Word | `.docx` | ✅ Full |
-| HTML | `.html`, `.htm` | ✅ Full |
-| JSON | `.json` | ✅ Full |
+| Format | Extensions | Support |
+|--------|------------|---------|
+| **Office** | `.docx`, `.xlsx`, `.xls`, `.pptx` | ✅ Full |
+| **Documents** | `.pdf`, `.rtf`, `.epub` | ✅ Full |
+| **Data** | `.csv`, `.json`, `.xml` | ✅ Full |
+| **Web** | `.html`, `.htm` | ✅ Full |
+| **Text** | `.txt`, `.md` | ✅ Full |
+| **Code** | `.py`, `.js`, `.java`, `.cpp`, `.sql`, etc. | ✅ Full |
+
+**Total:** 40+ formats including all major Office files, PDFs, spreadsheets, presentations, e-books, and source code!
 
 ### Ingest Your Documents
 
@@ -284,7 +286,7 @@ Edit `.env` to customize:
 ✅ **Knowledge base ready** (4 sample documents)  
 ✅ **OpenAI integration** (cloud, fast)  
 ✅ **Ollama integration** (local, private, active)  
-✅ **Multi-format support** (TXT, MD, PDF, DOCX, HTML, JSON)  
+✅- 📄 **40+ file formats** (Office, PDF, Excel, PowerPoint, CSV, EPUB, code files, and more!)  
 ✅ **Complete documentation**
 
 ---

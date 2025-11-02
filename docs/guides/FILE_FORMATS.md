@@ -12,8 +12,17 @@ Complete guide to all supported document formats for the RAG knowledge base.
 | Markdown | `.md` | ✅ Full Support | Formatted documentation |
 | PDF | `.pdf` | ✅ Full Support | Reports, papers, books |
 | Word | `.docx` | ✅ Full Support | Office documents |
+| Excel | `.xlsx`, `.xls` | ✅ Full Support | Spreadsheets, data tables |
+| PowerPoint | `.pptx` | ✅ Full Support | Presentations, slides |
+| CSV | `.csv` | ✅ Full Support | Data files, tables |
 | HTML | `.html`, `.htm` | ✅ Full Support | Web pages, articles |
+| XML | `.xml` | ✅ Full Support | Structured data |
 | JSON | `.json` | ✅ Full Support | Structured data |
+| RTF | `.rtf` | ✅ Full Support | Rich text documents |
+| EPUB | `.epub` | ✅ Full Support | E-books |
+| **Code Files** | `.py`, `.js`, `.java`, etc. | ✅ Full Support | Source code, config files |
+
+**Total:** 40+ file types supported!
 
 ---
 

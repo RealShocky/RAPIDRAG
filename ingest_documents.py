@@ -35,6 +35,38 @@ try:
 except ImportError:
     HTML_AVAILABLE = False
 
+try:
+    from openpyxl import load_workbook
+    import xlrd
+    EXCEL_AVAILABLE = True
+except ImportError:
+    EXCEL_AVAILABLE = False
+
+try:
+    from pptx import Presentation
+    PPTX_AVAILABLE = True
+except ImportError:
+    PPTX_AVAILABLE = False
+
+try:
+    from striprtf.striprtf import rtf_to_text
+    RTF_AVAILABLE = True
+except ImportError:
+    RTF_AVAILABLE = False
+
+try:
+    import ebooklib
+    from ebooklib import epub
+    EPUB_AVAILABLE = True
+except ImportError:
+    EPUB_AVAILABLE = False
+
+try:
+    import pandas as pd
+    PANDAS_AVAILABLE = True
+except ImportError:
+    PANDAS_AVAILABLE = False
+
 console = Console()
 
 
@@ -90,6 +122,99 @@ class DocumentIngestionPipeline:
             # Convert JSON to readable text
             return json.dumps(data, indent=2)
     
+    def load_excel(self, file_path: Path) -> str:
+        """Extract text from Excel file (.xlsx or .xls)"""
+        if not EXCEL_AVAILABLE:
+            raise ImportError("openpyxl/xlrd not installed. Run: pip install openpyxl xlrd")
+        
+        text_parts = []
+        ext = file_path.suffix.lower()
+        
+        if ext == '.xlsx':
+            # Use openpyxl for .xlsx
+            wb = load_workbook(file_path, data_only=True)
+            for sheet_name in wb.sheetnames:
+                sheet = wb[sheet_name]
+                text_parts.append(f"\n=== Sheet: {sheet_name} ===")
+                for row in sheet.iter_rows(values_only=True):
+                    row_text = ' | '.join(str(cell) if cell is not None else '' for cell in row)
+                    if row_text.strip():
+                        text_parts.append(row_text)
+        elif ext == '.xls':
+            # Use xlrd for .xls
+            wb = xlrd.open_workbook(file_path)
+            for sheet in wb.sheets():
+                text_parts.append(f"\n=== Sheet: {sheet.name} ===")
+                for row_idx in range(sheet.nrows):
+                    row = sheet.row_values(row_idx)
+                    row_text = ' | '.join(str(cell) for cell in row if cell)
+                    if row_text.strip():
+                        text_parts.append(row_text)
+        
+        return '\n'.join(text_parts)
+    
+    def load_powerpoint(self, file_path: Path) -> str:
+        """Extract text from PowerPoint file"""
+        if not PPTX_AVAILABLE:
+            raise ImportError("python-pptx not installed. Run: pip install python-pptx")
+        
+        prs = Presentation(file_path)
+        text_parts = []
+        
+        for slide_num, slide in enumerate(prs.slides, 1):
+            text_parts.append(f"\n=== Slide {slide_num} ===")
+            for shape in slide.shapes:
+                if hasattr(shape, "text") and shape.text:
+                    text_parts.append(shape.text)
+        
+        return '\n'.join(text_parts)
+    
+    def load_csv(self, file_path: Path) -> str:
+        """Extract text from CSV file"""
+        if not PANDAS_AVAILABLE:
+            # Fallback to standard csv module
+            import csv
+            with open(file_path, 'r', encoding='utf-8') as f:
+                reader = csv.reader(f)
+                return '\n'.join(' | '.join(row) for row in reader)
+        
+        # Use pandas for better handling
+        df = pd.read_csv(file_path)
+        return df.to_string()
+    
+    def load_rtf(self, file_path: Path) -> str:
+        """Extract text from RTF file"""
+        if not RTF_AVAILABLE:
+            raise ImportError("striprtf not installed. Run: pip install striprtf")
+        
+        with open(file_path, 'r', encoding='utf-8') as f:
+            rtf_content = f.read()
+            return rtf_to_text(rtf_content)
+    
+    def load_epub(self, file_path: Path) -> str:
+        """Extract text from EPUB file"""
+        if not EPUB_AVAILABLE:
+            raise ImportError("ebooklib not installed. Run: pip install ebooklib")
+        
+        book = epub.read_epub(file_path)
+        text_parts = []
+        
+        for item in book.get_items():
+            if item.get_type() == ebooklib.ITEM_DOCUMENT:
+                soup = BeautifulSoup(item.get_content(), 'html.parser')
+                text_parts.append(soup.get_text())
+        
+        return '\n\n'.join(text_parts)
+    
+    def load_xml(self, file_path: Path) -> str:
+        """Extract text from XML file"""
+        if not HTML_AVAILABLE:  # Uses lxml via BeautifulSoup
+            raise ImportError("lxml not installed. Run: pip install lxml")
+        
+        with open(file_path, 'r', encoding='utf-8') as f:
+            soup = BeautifulSoup(f.read(), 'lxml-xml')
+            return soup.get_text()
+    
     def load_documents_from_directory(self, directory: Path) -> List[Document]:
         """Load documents from a directory"""
         documents = []
@@ -102,7 +227,37 @@ class DocumentIngestionPipeline:
             '.docx': 'docx',
             '.html': 'html',
             '.htm': 'html',
-            '.json': 'json'
+            '.json': 'json',
+            '.xlsx': 'excel',
+            '.xls': 'excel',
+            '.pptx': 'powerpoint',
+            '.csv': 'csv',
+            '.rtf': 'rtf',
+            '.epub': 'epub',
+            '.xml': 'xml',
+            # Code files as text
+            '.py': 'text',
+            '.js': 'text',
+            '.java': 'text',
+            '.cpp': 'text',
+            '.c': 'text',
+            '.h': 'text',
+            '.cs': 'text',
+            '.php': 'text',
+            '.rb': 'text',
+            '.go': 'text',
+            '.rs': 'text',
+            '.ts': 'text',
+            '.jsx': 'text',
+            '.tsx': 'text',
+            '.sql': 'text',
+            '.sh': 'text',
+            '.yaml': 'text',
+            '.yml': 'text',
+            '.toml': 'text',
+            '.ini': 'text',
+            '.cfg': 'text',
+            '.conf': 'text'
         }
         
         if not directory.exists():
@@ -138,7 +293,19 @@ class DocumentIngestionPipeline:
                     content = self.load_html(file_path)
                 elif file_type == 'json':
                     content = self.load_json(file_path)
-                else:  # text, md
+                elif file_type == 'excel':
+                    content = self.load_excel(file_path)
+                elif file_type == 'powerpoint':
+                    content = self.load_powerpoint(file_path)
+                elif file_type == 'csv':
+                    content = self.load_csv(file_path)
+                elif file_type == 'rtf':
+                    content = self.load_rtf(file_path)
+                elif file_type == 'epub':
+                    content = self.load_epub(file_path)
+                elif file_type == 'xml':
+                    content = self.load_xml(file_path)
+                else:  # text, md, code files
                     with open(file_path, 'r', encoding='utf-8') as f:
                         content = f.read()
                 
