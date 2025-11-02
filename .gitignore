@@ -18,14 +18,16 @@ lib64/
 parts/
 sdist/
 var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
 
-# Virtual environments
+# Python virtual environments
 venv/
+env/
 ENV/
+Lib/
+Scripts/
+share/
+pyvenv.cfg
+Include/
 env/
 
 # Data and models
