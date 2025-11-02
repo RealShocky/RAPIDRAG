@@ -136,10 +136,12 @@ git push origin main
 4. Deploy!
 
 # 3. Share URL
-https://your-app.streamlit.app
+https://rapidrag.streamlit.app
 ```
 
 **Cost:** Free
+
+**🎉 RAPIDRAG is deployed at: https://rapidrag.streamlit.app**
 
 ---
 

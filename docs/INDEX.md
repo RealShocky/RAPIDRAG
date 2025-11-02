@@ -1,6 +1,8 @@
-# Documentation Index
+# 📚 RAPIDRAG Documentation Index
 
-Quick navigation to all documentation.
+Complete guide to RAPIDRAG - Lightning Fast AI Knowledge Base
+
+🌐 **[Live Demo](https://rapidrag.streamlit.app)** | Try it now without installation!
 
 ---
 

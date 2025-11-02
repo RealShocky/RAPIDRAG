@@ -1,4 +1,12 @@
-# RAG Chatbot with Haystack
+# ⚡ RAPIDRAG - Lightning Fast AI Knowledge Base
+
+[![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-rapidrag.streamlit.app-FF4B4B?style=for-the-badge)](https://rapidrag.streamlit.app)
+[![Python](https://img.shields.io/badge/Python-3.11+-blue?style=for-the-badge&logo=python)](https://www.python.org/)
+[![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://streamlit.io)
+
+**Retrieval-Augmented Generation chatbot with beautiful web interface, CLI, and complete out-of-box setup.**
+
+🌐 **[Try Live Demo](https://rapidrag.streamlit.app)** | 📚 [Documentation](docs/)
 
 A privacy-focused Retrieval-Augmented Generation (RAG) chatbot built with Haystack framework. Supports both cloud-based (OpenAI) and local LLM options (Ollama) for maximum data privacy.
 
