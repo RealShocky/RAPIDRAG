@@ -1,0 +1,33 @@
+# Core Haystack framework
+haystack-ai>=2.0.0
+
+# Embeddings and transformers
+sentence-transformers>=3.0.0
+torch>=2.0.0
+
+# LLM Integrations - OpenAI (cloud)
+openai>=1.0.0
+
+# LLM Integrations - Local options for privacy (pre-installed for out-of-box)
+ollama-haystack>=1.0.0  # For Ollama local models (included)
+# huggingface-haystack>=1.0.0  # For HuggingFace models (optional)
+
+# Data handling
+datasets>=2.6.1
+
+# Document processing - multiple formats
+pypdf>=3.0.0  # PDF support
+python-docx>=1.0.0  # DOCX support
+markdown>=3.4.0  # Enhanced markdown
+beautifulsoup4>=4.12.0  # HTML support
+lxml>=4.9.0  # XML/HTML parsing
+
+# CLI and utilities
+python-dotenv>=1.0.0
+rich>=13.0.0  # For beautiful CLI output
+
+# Web Interface
+streamlit>=1.28.0  # Beautiful web UI
+streamlit-extras>=0.3.0  # Additional components
+plotly>=5.17.0  # Interactive charts
+pillow>=10.0.0  # Image processing

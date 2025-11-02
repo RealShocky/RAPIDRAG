@@ -1,0 +1,94 @@
+================================================================================
+                    RAG CHATBOT - GET STARTED IN 3 STEPS
+================================================================================
+
+STEP 1: INSTALL DEPENDENCIES
+----------------------------
+Open terminal in this directory and run:
+
+    pip install -r requirements.txt
+
+This installs Haystack and all required packages.
+
+
+STEP 2: CONFIGURE YOUR CHATBOT
+-------------------------------
+Run the interactive setup wizard:
+
+    python setup.py
+
+This helps you choose between:
+  - OpenAI (cloud, fast, requires API key)
+  - Ollama (local, private, free - RECOMMENDED FOR PRIVACY)
+  - HuggingFace (local, private, free)
+
+
+STEP 3A: ADD SAMPLE DOCUMENTS (QUICK TEST)
+------------------------------------------
+Load sample documents about RAG and AI:
+
+    python ingest_documents.py --samples
+
+
+STEP 3B: ADD YOUR OWN DOCUMENTS (PRODUCTION)
+--------------------------------------------
+1. Copy your .txt or .md files to the documents/ folder
+2. Run: python ingest_documents.py
+
+
+STEP 4: START CHATTING!
+-----------------------
+Launch the chatbot:
+
+    python chatbot.py
+
+Then ask questions about your documents!
+
+
+================================================================================
+                            PRIVACY CONCERNS?
+================================================================================
+
+For MAXIMUM PRIVACY, use Ollama (local models):
+
+1. Install Ollama: https://ollama.ai
+2. Pull a model: ollama pull llama3.2
+3. Run setup.py and choose option 2 (Ollama)
+
+With Ollama:
+✓ All data stays on your machine
+✓ No API keys needed
+✓ No external calls
+✓ 100% private
+
+
+================================================================================
+                              NEED HELP?
+================================================================================
+
+Read QUICKSTART.md for detailed instructions
+Read PRIVACY.md for privacy comparison and security guide
+Read PROJECT_OVERVIEW.md for complete technical details
+
+Test your setup: python test_setup.py
+
+
+================================================================================
+                           QUICK COMMANDS
+================================================================================
+
+Setup system:           python setup.py
+Test installation:      python test_setup.py
+Add documents:          python ingest_documents.py --samples
+Start chatbot:          python chatbot.py
+
+In chatbot:
+  help     - Show commands
+  info     - System info
+  history  - View chat history
+  exit     - Quit
+
+
+================================================================================
+                    READY TO BUILD YOUR KNOWLEDGE BASE!
+================================================================================

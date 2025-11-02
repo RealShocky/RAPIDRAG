@@ -1,0 +1,9 @@
+# System packages required for document processing
+# These will be installed via apt-get on Streamlit Cloud
+
+# For lxml (HTML parsing)
+libxml2-dev
+libxslt1-dev
+
+# For PDF processing
+poppler-utils
