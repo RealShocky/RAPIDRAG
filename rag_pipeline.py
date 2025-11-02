@@ -14,7 +14,6 @@ from haystack.components.embedders import SentenceTransformersTextEmbedder
 from haystack.components.retrievers.in_memory import InMemoryEmbeddingRetriever
 from haystack.components.builders import ChatPromptBuilder
 from haystack.dataclasses import ChatMessage
-from haystack.components.generators.chat import OpenAIChatGenerator
 
 from config import Config
 
@@ -36,6 +35,10 @@ class RAGPipeline:
                 "Please run 'python ingest_documents.py' first to create the knowledge base."
             )
         
+        # Check if already loaded
+        if self.document_store.count_documents() > 0:
+            return len(self.document_store.filter_documents())
+        
         # Load documents from JSON
         with open(self.config.DOCUMENT_STORE_PATH, 'r', encoding='utf-8') as f:
             docs_data = json.load(f)
@@ -51,8 +54,8 @@ class RAGPipeline:
             )
             documents.append(doc)
         
-        # Write to document store
-        self.document_store.write_documents(documents)
+        # Write to document store (using policy to skip duplicates)
+        self.document_store.write_documents(documents, policy="skip")
         
         return len(documents)
     
@@ -61,11 +64,11 @@ class RAGPipeline:
         llm_config = self.config.get_llm_config()
         
         if llm_config["provider"] == "openai":
-            # OpenAI Generator
+            # Lazy import to avoid dependency issues on startup
+            from haystack.components.generators.openai import OpenAIGenerator
             os.environ["OPENAI_API_KEY"] = llm_config["api_key"]
-            self.llm_generator = OpenAIChatGenerator(
-                model=llm_config["model"]
-            )
+            llm = OpenAIGenerator(model=llm_config["model"])
+            self.llm_generator = llm
             
         elif llm_config["provider"] == "ollama":
             # Ollama Generator (requires ollama-haystack integration)
@@ -100,9 +103,11 @@ class RAGPipeline:
         
         # Initialize components
         
-        # 1. Text Embedder - converts user query to embedding
-        text_embedder = SentenceTransformersTextEmbedder(
-            model=self.config.EMBEDDING_MODEL
+        # 1. Query embedder (force CPU to avoid CUDA errors)
+        from haystack.utils import ComponentDevice
+        query_embedder = SentenceTransformersTextEmbedder(
+            model=self.config.EMBEDDING_MODEL,
+            device=ComponentDevice.from_str("cpu")
         )
         
         # 2. Retriever - finds relevant documents
@@ -137,7 +142,7 @@ Answer:"""
         pipeline = Pipeline()
         
         # Add components
-        pipeline.add_component("text_embedder", text_embedder)
+        pipeline.add_component("text_embedder", query_embedder)
         pipeline.add_component("retriever", retriever)
         pipeline.add_component("prompt_builder", prompt_builder)
         pipeline.add_component("llm", self.llm_generator)

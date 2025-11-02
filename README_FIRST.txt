@@ -1,8 +1,15 @@
 ================================================================================
-                    RAG CHATBOT - READ ME FIRST!
+                    RAPIDRAG - LIGHTNING FAST AI KNOWLEDGE BASE
 ================================================================================
 
 CONGRATULATIONS! You have a complete, production-ready RAG chatbot system!
+
+================================================================================
+            RAPIDRAG - LIGHTNING FAST AI KNOWLEDGE BASE
+================================================================================
+
+LIVE DEMO: https://rapidrag.streamlit.app
+Try it now without installation!
 
 ================================================================================
                     🚀 QUICK START (5 MINUTES)

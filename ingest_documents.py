@@ -213,9 +213,12 @@ class DocumentIngestionPipeline:
         console.print(f"[cyan]Initializing embedder: {self.config.EMBEDDING_MODEL}[/cyan]")
         
         with console.status("[bold cyan]Downloading embedding model..."):
-            self.doc_embedder = SentenceTransformersDocumentEmbedder(
-                model=self.config.EMBEDDING_MODEL
+            from haystack.utils import ComponentDevice
+            embedder = SentenceTransformersDocumentEmbedder(
+                model=self.config.EMBEDDING_MODEL,
+                device=ComponentDevice.from_str("cpu")
             )
+            self.doc_embedder = embedder
             self.doc_embedder.warm_up()
         
         console.print("[green]+[/green] Embedder initialized")

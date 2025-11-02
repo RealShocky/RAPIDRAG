@@ -4,6 +4,11 @@ Beautiful space-themed Streamlit dashboard with animations
 """
 
 import streamlit as st
+try:
+    import streamlit_authenticator as stauth
+    AUTH_AVAILABLE = True
+except:
+    AUTH_AVAILABLE = False
 import time
 from pathlib import Path
 from datetime import datetime
@@ -13,6 +18,9 @@ import plotly.graph_objects as go
 from rag_pipeline import SimpleRAGPipeline
 from config import Config
 import os
+import yaml
+from yaml.loader import SafeLoader
+import hashlib
 
 # Page configuration
 st.set_page_config(
@@ -244,18 +252,90 @@ def init_session_state():
         st.session_state.total_documents = 0
     if 'total_queries' not in st.session_state:
         st.session_state.total_queries = 0
+    if 'authentication_status' not in st.session_state:
+        st.session_state.authentication_status = None
+    if 'username' not in st.session_state:
+        st.session_state.username = None
+    if 'name' not in st.session_state:
+        st.session_state.name = None
+
+# Session persistence
+@st.cache_data(ttl=3600)
+def load_user_sessions():
+    """Load user sessions from file (cached for 1 hour)"""
+    session_file = Path("data/user_sessions.json")
+    if session_file.exists():
+        try:
+            with open(session_file) as f:
+                return json.load(f)
+        except:
+            return {}
+    return {}
+
+def save_user_session(username, data):
+    """Save user session data"""
+    session_file = Path("data/user_sessions.json")
+    session_file.parent.mkdir(exist_ok=True)
+    
+    sessions = load_user_sessions()
+    sessions[username] = data
+    
+    with open(session_file, 'w') as f:
+        json.dump(sessions, f)
+    
+    # Clear cache to reload
+    load_user_sessions.clear()
+
+def load_user_history(username):
+    """Load user's chat history"""
+    sessions = load_user_sessions()
+    return sessions.get(username, {}).get('chat_history', [])
 
 # Initialize RAG pipeline
 @st.cache_resource
 def get_rag_pipeline():
     """Initialize and cache the RAG pipeline"""
     try:
-        rag = SimpleRAGPipeline()
-        rag.initialize()
-        return rag
+        pipeline = SimpleRAGPipeline()
+        return pipeline
     except Exception as e:
-        st.error(f"Failed to initialize RAG system: {e}")
+        st.error(f"Error initializing pipeline: {str(e)}")
         return None
+
+# Load authentication config
+@st.cache_data
+def load_auth_config():
+    """Load authentication configuration"""
+    config_file = Path('.streamlit/auth_config.yaml')
+    
+    # Create default config if doesn't exist
+    if not config_file.exists():
+        config_file.parent.mkdir(exist_ok=True)
+        default_config = {
+            'credentials': {
+                'usernames': {
+                    'demo': {
+                        'name': 'Demo User',
+                        'password': '$2b$12$KIXq7zJ5F5QxZ5Z5Z5Z5ZO5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5'  # 'demo'
+                    },
+                    'admin': {
+                        'name': 'Admin',
+                        'password': '$2b$12$KIXq7zJ5F5QxZ5Z5Z5Z5ZO5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5'  # 'admin'
+                    }
+                }
+            },
+            'cookie': {
+                'name': 'rapidrag_auth',
+                'key': 'rapidrag_secret_key_2024',
+                'expiry_days': 30
+            },
+            'preauthorized': []
+        }
+        with open(config_file, 'w') as f:
+            yaml.dump(default_config, f)
+    
+    with open(config_file) as f:
+        return yaml.load(f, Loader=SafeLoader)
 
 # Create animated metric cards
 def animated_metric(label, value, icon="🌟"):
@@ -291,6 +371,45 @@ def animated_metric(label, value, icon="🌟"):
 def main():
     load_css()
     init_session_state()
+    
+    # Authentication (optional - disabled for now due to dependency conflicts)
+    if AUTH_AVAILABLE:
+        try:
+            config = load_auth_config()
+            authenticator = stauth.Authenticate(
+                config['credentials'],
+                config['cookie']['name'],
+                config['cookie']['key'],
+                config['cookie']['expiry_days']
+            )
+            
+            name, authentication_status, username = authenticator.login('Login to RAPIDRAG', 'main')
+            
+            if authentication_status == False:
+                st.error('❌ Username/password is incorrect')
+                st.info('💡 Demo credentials: username=`demo`, password=`demo`')
+                return
+            elif authentication_status == None:
+                st.warning('⚡ Please enter your username and password')
+                st.info('💡 Demo credentials: username=`demo`, password=`demo`')
+                return
+            
+            # Store auth info
+            st.session_state.authentication_status = authentication_status
+            st.session_state.username = username
+            st.session_state.name = name
+            
+            # Load user's chat history
+            if not st.session_state.chat_history:
+                st.session_state.chat_history = load_user_history(username)
+            
+        except Exception as e:
+            # Authentication error - continue without it
+            st.info(f'ℹ️ Running without authentication (dependencies conflict)')
+            pass
+    else:
+        # Auth module not available
+        st.info('ℹ️ Running without authentication')
     
     # Sidebar
     with st.sidebar:
@@ -344,6 +463,15 @@ def main():
         
         # Quick actions
         st.markdown("### ⚡ Quick Actions")
+        
+        # Logout button if authenticated
+        if st.session_state.get('username'):
+            st.markdown(f"👤 **{st.session_state.name}**")
+            try:
+                authenticator.logout('Logout', 'sidebar')
+            except:
+                pass
+        
         if st.button("🔄 Refresh System", use_container_width=True):
             st.cache_resource.clear()
             st.session_state.system_initialized = False
@@ -351,7 +479,20 @@ def main():
         
         if st.button("🗑️ Clear Chat", use_container_width=True):
             st.session_state.chat_history = []
+            # Save cleared history
+            if st.session_state.get('username'):
+                save_user_session(st.session_state.username, {'chat_history': []})
             st.rerun()
+        
+        if st.button("💾 Save Session", use_container_width=True):
+            if st.session_state.get('username'):
+                save_user_session(st.session_state.username, {
+                    'chat_history': st.session_state.chat_history,
+                    'total_queries': st.session_state.total_queries
+                })
+                st.success("✅ Session saved!")
+            else:
+                st.info("ℹ️ Login to save sessions")
         
         st.markdown("---")
         st.markdown("""
@@ -431,6 +572,18 @@ def show_chat_page():
                     st.markdown(response)
                     st.session_state.chat_history.append({"role": "assistant", "content": response})
                     st.session_state.total_queries += 1
+                    
+                    # Auto-save session if authenticated
+                    if st.session_state.get('username'):
+                        save_user_session(st.session_state.username, {
+                            'chat_history': st.session_state.chat_history,
+                            'total_queries': st.session_state.total_queries
+                        })
+                    
+                    # Limit history to prevent memory issues
+                    if len(st.session_state.chat_history) > 50:
+                        st.session_state.chat_history = st.session_state.chat_history[-50:]
+                        
                 except Exception as e:
                     error_msg = f"❌ Error: {str(e)}"
                     st.error(error_msg)

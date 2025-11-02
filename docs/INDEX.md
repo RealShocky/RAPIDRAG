@@ -71,6 +71,7 @@ Complete guide to RAPIDRAG - Lightning Fast AI Knowledge Base
 - [`WEB_INTERFACE_GUIDE.md`](WEB_INTERFACE_GUIDE.md) - Web UI complete guide
 - [`guides/QUICKSTART.md`](guides/QUICKSTART.md) - 5-minute walkthrough
 - [`guides/DEPLOYMENT_GUIDE.md`](guides/DEPLOYMENT_GUIDE.md) - Cloud deployment options
+- [`guides/AUTHENTICATION.md`](guides/AUTHENTICATION.md) - **NEW!** User authentication & sessions
 - [`guides/WEB_INTERFACE.md`](guides/WEB_INTERFACE.md) - Web UI quick reference
 - [`guides/FILE_FORMATS.md`](guides/FILE_FORMATS.md) - Supported formats
 - [`guides/PRIVACY.md`](guides/PRIVACY.md) - Privacy & security

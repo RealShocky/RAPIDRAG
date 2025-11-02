@@ -33,6 +33,7 @@ env/
 # Data and models
 data/
 *.json
+!.streamlit/auth_config.yaml
 *.pkl
 *.bin
 
