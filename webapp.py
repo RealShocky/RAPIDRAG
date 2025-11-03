@@ -297,6 +297,7 @@ def get_rag_pipeline():
     """Initialize and cache the RAG pipeline"""
     try:
         pipeline = SimpleRAGPipeline()
+        pipeline.initialize()  # CRITICAL: Load documents into the pipeline!
         return pipeline
     except Exception as e:
         st.error(f"Error initializing pipeline: {str(e)}")
@@ -592,24 +593,20 @@ def show_chat_page():
 def show_upload_page():
     """Document upload interface"""
     st.markdown("""
-    <div style='text-align: center; margin-bottom: 2rem;'>
-        <h1>📤 UPLOAD TO KNOWLEDGE BASE</h1>
-        <p style='
-            font-family: "Rajdhani", sans-serif;
-            font-size: 1.2rem;
-            color: #a0a0ff;
-        '>
-            Expand your knowledge base instantly
+    <div style='text-align: center; color: #a0a0ff; margin-bottom: 2rem;'>
+        Supported formats: Office (DOCX, XLSX, PPTX), PDF, EPUB, RTF, CSV, HTML, JSON, XML, Code Files, and more!
         </p>
     </div>
     """, unsafe_allow_html=True)
     
     # File upload
     uploaded_files = st.file_uploader(
-        "Upload Documents",
-        type=['txt', 'md', 'pdf', 'docx', 'html', 'json'],
+        "Drag and drop files here",
         accept_multiple_files=True,
-        help="Supported formats: TXT, MD, PDF, DOCX, HTML, JSON"
+        type=['txt', 'md', 'pdf', 'docx', 'xlsx', 'xls', 'pptx', 'csv', 'html', 'htm', 'json', 'xml', 'rtf', 'epub',
+              'py', 'js', 'java', 'cpp', 'c', 'h', 'cs', 'php', 'rb', 'go', 'rs', 'ts', 'jsx', 'tsx', 'sql', 'sh',
+              'yaml', 'yml', 'toml', 'ini', 'cfg', 'conf'],
+        help="Limit: 200MB per file • TXT, MD, PDF, DOCX, XLSX, PPTX, CSV, HTML, JSON, EPUB, RTF, XML, Code Files"
     )
     
     if uploaded_files:
@@ -659,51 +656,61 @@ def show_upload_page():
             with progress_container:
                 progress_bar.progress(60, text="Running document ingestion...")
             
-            # Run ingestion
+            # Run ingestion directly (more reliable than subprocess)
             try:
-                import subprocess
-                result = subprocess.run(
-                    ["py", "ingest_documents.py"],
-                    capture_output=True,
-                    text=True
-                )
+                # Import the ingestion pipeline
+                from ingest_documents import DocumentIngestionPipeline
                 
                 with progress_container:
-                    progress_bar.progress(90, text="Finalizing...")
+                    progress_bar.progress(70, text="Embedding documents...")
                 
-                if result.returncode == 0:
+                # Run ingestion
+                pipeline = DocumentIngestionPipeline()
+                pipeline.initialize_embedder()
+                
+                with progress_container:
+                    progress_bar.progress(80, text="Loading documents...")
+                
+                # Load from directory
+                docs = pipeline.load_documents_from_directory(documents_dir)
+                
+                if docs:
+                    with progress_container:
+                        progress_bar.progress(85, text="Creating embeddings...")
+                    
+                    pipeline.embed_and_store_documents(docs)
+                    
+                    with progress_container:
+                        progress_bar.progress(95, text="Saving to knowledge base...")
+                    
+                    pipeline.save_document_store()
+                    
                     with progress_container:
                         progress_bar.progress(100, text="Complete!")
                     
                     with status_container:
                         status_text.empty()
-                        st.success("🎉 Documents successfully added to knowledge base!")
+                        st.success(f" {len(docs)} document(s) successfully added to knowledge base!")
                     
                     # Show balloons
                     st.balloons()
                     
-                    # Update document count
-                    try:
-                        docs_path = Path("data/document_store.json")
-                        if docs_path.exists():
-                            with open(docs_path) as f:
-                                data = json.load(f)
-                                st.session_state.total_documents = len(data)
-                                st.info(f"📊 Total documents in knowledge base: {len(data)}")
-                    except:
-                        pass
+                    # Clear pipeline cache to reload
+                    if 'rag_pipeline' in st.session_state:
+                        del st.session_state.rag_pipeline
+                        st.session_state.system_initialized = False
                     
-                    # Refresh pipeline
-                    st.cache_resource.clear()
-                    st.session_state.system_initialized = False
-                    
-                    st.warning("🔄 Refreshing system... Please wait 3 seconds...")
-                    time.sleep(3)
-                    st.rerun()
+                    st.info("💡 Go to Chat tab to query your new documents!")
                 else:
-                    st.error(f"❌ Error processing documents: {result.stderr}")
+                    with status_container:
+                        status_text.empty()
+                        st.warning("⚠️ No valid documents found to process")
+                        
             except Exception as e:
-                st.error(f"❌ Error: {e}")
+                with status_container:
+                    status_text.empty()
+                    st.error(f"❌ Error during ingestion: {str(e)}")
+                    st.exception(e)
     
     # Current documents
     st.markdown("---")
